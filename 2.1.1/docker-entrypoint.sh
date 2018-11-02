@@ -1,5 +1,20 @@
 #!/bin/bash
 set -eo pipefail
+
+java_params=""
+
+if [ ! -z "$JAVA_XMS" ]; then
+    java_params+=( -Xms"${JAVA_XMS}" )
+else
+    java_params+=( -Xms512m )
+fi
+
+if [ ! -z "$JAVA_XMX" ]; then
+    java_params+=( -Xmx"${JAVA_XMX}" )
+else
+    java_params+=( -Xmx1g )
+fi
+
 _loadData() {
     namespace=$(basename "$1")
     if [ ! -e "$1/RWStore.properties" ]; then
@@ -9,24 +24,12 @@ _loadData() {
     if [ ! -e -d "$1/data" ]; then
         echo >&2 ' No data dir for kb to import '
 	fi
-    dataloader=( java -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -quiet -namespace ${namespace} $1/RWStore.properties $1/data/ )
+    dataloader=( java ${java_params[@]} -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -quiet -namespace ${namespace} $1/RWStore.properties $1/data/ )
     echo "loading $1"
     "${dataloader[@]}"
 }
+
 if [ "$1" = 'blazegraph' ]; then
-    set java_params=
-
-    if [ ! -z "$JAVA_XMS" ]; then
-        java_params+=( -Xms"${JAVA_XMS}" )
-    else
-        java_params+=( -Xms512m )
-    fi
-
-    if [ ! -z "$JAVA_XMX" ]; then
-        java_params+=( -Xmx"${JAVA_XMX}" )
-    else
-        java_params+=( -Xmx1g )
-    fi
 
     conf=()
     if [ -e /etc/blazegraph/override.xml ]; then
