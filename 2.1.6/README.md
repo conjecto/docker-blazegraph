@@ -1,7 +1,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.6/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
+-	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
 -	[`2.1.5` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.5/Dockerfile)
 -	[`2.1.4` (*2.1.4/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.4/Dockerfile)
 -	[`2.1.2` (*2.1.2/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.2/Dockerfile)
@@ -50,8 +50,7 @@ services:
     db:
         image: conjecto/blazegraph
         environment:
-            JAVA_XMS: 512m
-            JAVA_XMX: 1g
+            JAVA_OPTS: "-Xms512m -Xmx2g"
 
 ```
 
@@ -97,21 +96,15 @@ $ docker run --name some-blazegraph -v ./var/blazegraph:/var/lib/blazegraph -d c
 
 When you start the `blazegraph` image, you can adjust the configuration of the Blazegraph instance by passing one or more environment variables on the `docker run` command line. Do note that none of the variables below will have any effect if you start the container with a data directory that already contains a database: any pre-existing database will always be left untouched on container startup.
 
-### `JAVA_XMS`
+### `JAVA_OPTS`
 
-This variable is optional and allows you to specify specifies the initial memory allocation pool for the Java Virtual Machine (JVM). Default is set to 512Mio.
-
-### `JAVA_XMX`
-
-This variable is optional and allows you to specify the maximum memory allocation pool for the Java Virtual Machine (JVM). Default is set to 1Gio.
+This variable is optional and allows you to specify the run options for the Java Virtual Machine (JVM). Default is set to "-Xms512m -Xmx2g".
 
 # Initializing a fresh instance
 
 When a container is started for the first time, a new `kb` namespace will be created and initialized with the provided configuration variables.
-Furthermore, it will load RWStore.properties found in `/docker-entrypoint-initdb.d/kb` to configure the namespace and import RDF files
-present in `/docker-entrypoint-initdb.d/kb/data/`. Files will be executed in alphabetical order.
-
-If you want to create another namespace at initialization, juste mount a new directory into `/docker-entrypoint-initdb.d` with the same organization.
+Furthermore, it will load RWStore.properties found in `/docker-entrypoint-initdb.d/someNamespace` to configure the namespace and import RDF files
+present in `/docker-entrypoint-initdb.d/someNamespace/data/`  . Files will be executed in alphabetical order.
 
 Example `stack.yml` for `blazegraph`:
 
@@ -123,11 +116,11 @@ services:
     db:
         image: conjecto/blazegraph
         environment:
-            JAVA_XMS: 512m
-            JAVA_XMX: 1g
+            JAVA_OPTS: "-Xms512m -Xmx2g"
         volumes:
             - ./blazegraph-data:/var/lib/blazegraph
-            - ./docker-entrypoint-initdb.d/kb/data:/data
+            - ./data:/docker-entrypoint-initdb.d/kb/data
+            - ./RWStore.properties:/docker-entrypoint-initdb.d/kb/RWStore.properties
         ports:
             - "9999:9999"
 ```

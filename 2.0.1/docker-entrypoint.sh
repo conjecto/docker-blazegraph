@@ -2,22 +2,10 @@
 set -eo pipefail
 shopt -s nullglob
 
-JAVA_PARAMS=""
-
-if [ ! -z "$JAVA_XMS" ]; then
-    JAVA_PARAMS+=( -Xms"${JAVA_XMS}" )
-else
-    JAVA_PARAMS+=( -Xms512m )
-fi
-
-if [ ! -z "$JAVA_XMX" ]; then
-    JAVA_PARAMS+=( -Xmx"${JAVA_XMX}" )
-else
-    JAVA_PARAMS+=( -Xmx1g )
-fi
+JAVA_OPTS=${JAVA_OPTS:--Xms512m -Xmx1g}
 
 declare -g JOURNAL_ALREADY_EXISTS
-if [ -d "$BLAZEGRAPH_HOME/blazegraph.jnl" ]; then
+if [ -f "$BLAZEGRAPH_HOME/blazegraph.jnl" ]; then
     JOURNAL_ALREADY_EXISTS='true'
 fi
 
@@ -27,10 +15,10 @@ _loadData() {
         echo >&2 'No configuration file for the namespace'
 		exit 1
 	fi
-    if [ ! -e -d "$1/data" ]; then
+    if [ ! -e "$1/data" ]; then
         echo >&2 'No data dir for namespace to import'
 	fi
-    dataloader=( java ${JAVA_PARAMS[@]} -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -namespace ${namespace} $1/RWStore.properties $1/data/ )
+    dataloader=( java ${JAVA_OPTS} -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -namespace ${namespace} $1/RWStore.properties $1/data/ )
     echo "Loading namespace $namespace ..."
     "${dataloader[@]}"
 }
@@ -49,11 +37,11 @@ if [ "$1" = 'blazegraph' ]; then
     fi
 
     # run blazegraph
-    conf=()
+    opts=()
     if [ -e /etc/blazegraph/override.xml ]; then
-        conf+=( -Djetty.overrideWebXml=/etc/blazegraph/override.xml )
+        opts+=( -Djetty.overrideWebXml=/etc/blazegraph/override.xml )
     fi
-    blazegraph=( java ${JAVA_PARAMS[@]} ${conf[@]} -jar /usr/bin/blazegraph.jar )
+    blazegraph=( java ${JAVA_OPTS} ${opts[@]} -jar /usr/bin/blazegraph.jar )
     exec "${blazegraph[@]}"
 else
     exec "$@"

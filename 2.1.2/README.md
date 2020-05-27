@@ -50,8 +50,7 @@ services:
     db:
         image: conjecto/blazegraph
         environment:
-            JAVA_XMS: 512m
-            JAVA_XMX: 1g
+            JAVA_OPTS: "-Xms512m -Xmx2g"
 
 ```
 
@@ -97,13 +96,9 @@ $ docker run --name some-blazegraph -v ./var/blazegraph:/var/lib/blazegraph -d c
 
 When you start the `blazegraph` image, you can adjust the configuration of the Blazegraph instance by passing one or more environment variables on the `docker run` command line. Do note that none of the variables below will have any effect if you start the container with a data directory that already contains a database: any pre-existing database will always be left untouched on container startup.
 
-### `JAVA_XMS`
+### `JAVA_OPTS`
 
-This variable is optional and allows you to specify specifies the initial memory allocation pool for the Java Virtual Machine (JVM). Default is set to 512Mio.
-
-### `JAVA_XMX`
-
-This variable is optional and allows you to specify the maximum memory allocation pool for the Java Virtual Machine (JVM). Default is set to 1Gio.
+This variable is optional and allows you to specify the run options for the Java Virtual Machine (JVM). Default is set to "-Xms512m -Xmx2g".
 
 # Initializing a fresh instance
 
@@ -121,11 +116,11 @@ services:
     db:
         image: conjecto/blazegraph
         environment:
-            JAVA_XMS: 512m
-            JAVA_XMX: 1g
+            JAVA_OPTS: "-Xms512m -Xmx2g"
         volumes:
-            - /var/blazegraph:/var/lib/blazegraph
-            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./blazegraph-data:/var/lib/blazegraph
+            - ./data:/docker-entrypoint-initdb.d/kb/data
+            - ./RWStore.properties:/docker-entrypoint-initdb.d/kb/RWStore.properties
         ports:
             - "9999:9999"
 ```

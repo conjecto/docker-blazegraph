@@ -4,5 +4,4 @@ services:
     db:
         image: conjecto/blazegraph
         environment:
-            JAVA_XMS: 512m
-            JAVA_XMX: 1g
+            JAVA_OPTS: "-Xms512m -Xmx2g"
