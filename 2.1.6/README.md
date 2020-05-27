@@ -1,7 +1,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
+-	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.6/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
 -	[`2.1.5` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.5/Dockerfile)
 -	[`2.1.4` (*2.1.4/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.4/Dockerfile)
 -	[`2.1.2` (*2.1.2/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.2/Dockerfile)
@@ -108,8 +108,10 @@ This variable is optional and allows you to specify the maximum memory allocatio
 # Initializing a fresh instance
 
 When a container is started for the first time, a new `kb` namespace will be created and initialized with the provided configuration variables.
-Furthermore, it will load RWStore.properties found in `/docker-entrypoint-initdb.d/someNamespace` to configure the namespace and import RDF files
-present in `/docker-entrypoint-initdb.d/someNamespace/data/`  . Files will be executed in alphabetical order.
+Furthermore, it will load RWStore.properties found in `/docker-entrypoint-initdb.d/kb` to configure the namespace and import RDF files
+present in `/docker-entrypoint-initdb.d/kb/data/`. Files will be executed in alphabetical order.
+
+If you want to create another namespace at initialization, juste mount a new directory into `/docker-entrypoint-initdb.d` with the same organization.
 
 Example `stack.yml` for `blazegraph`:
 
@@ -124,8 +126,8 @@ services:
             JAVA_XMS: 512m
             JAVA_XMX: 1g
         volumes:
-            - /var/blazegraph:/var/lib/blazegraph
-            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./blazegraph-data:/var/lib/blazegraph
+            - ./docker-entrypoint-initdb.d/kb/data:/data
         ports:
             - "9999:9999"
 ```

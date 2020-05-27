@@ -1,12 +1,12 @@
-# docker build -t conjecto/blazegraph:2.1.4 .
-FROM openjdk:8-alpine
+# docker build -t conjecto/blazegraph:2.1.6 .
+FROM adoptopenjdk/openjdk9:alpine
 LABEL maintainer="Conjecto <contact@conjecto.com>"
 ENV BLAZEGRAPH_HOME=/var/lib/blazegraph
 
 RUN apk update && apk add --no-cache bash
 
 # install blazegraph
-ADD https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_4/blazegraph.jar /usr/bin/blazegraph.jar
+ADD https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/bigdata.jar /usr/bin/blazegraph.jar
 RUN mkdir $BLAZEGRAPH_HOME
 
 # Config files

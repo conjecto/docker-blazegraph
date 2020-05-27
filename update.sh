@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-defaultjdkSuite='openjdk:8-alpine'
-declare -A jdkSuites=(
+defaultImage='openjdk:8-alpine'
+declare -A images=(
 	[2.0.0]='openjdk:8-alpine'
 	[2.0.1]='openjdk:8-alpine'
 	[2.1.0]='openjdk:8-alpine'
@@ -10,6 +10,7 @@ declare -A jdkSuites=(
 	[2.1.2]='openjdk:8-alpine'
 	[2.1.4]='openjdk:8-alpine'
 	[2.1.5]='openjdk:8-alpine'
+	[2.1.6]='adoptopenjdk/openjdk9:alpine'
 )
 
 declare -A urlBlazeGraphSuites=(
@@ -20,6 +21,7 @@ declare -A urlBlazeGraphSuites=(
 	[2.1.2]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_2/blazegraph.jar'
 	[2.1.4]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_4/blazegraph.jar'
 	[2.1.5]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_5/blazegraph.jar'
+	[2.1.6]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/bigdata.jar'
 )
 
 versions=( "$@" )
@@ -36,18 +38,16 @@ for version in "${versions[@]}"; do
     fi
 
     # prepare Dockerfile
-	{ cat Dockerfile-alpine.template; } > "$version/Dockerfile"
+    mkdir -p "$version/docker-entrypoint-initdb.d/kb"
+	{ cat Dockerfile.template; } > "$version/Dockerfile"
 	{ cat README.template; } > "$version/README.md"
-	if [ ! -e "$version/docker-entrypoint-initdb.d" ]; then
-	    mkdir -p "$version/docker-entrypoint-initdb.d/kb/data/"
-	fi
 	{ cat RWStore.properties; } > "$version/docker-entrypoint-initdb.d/kb/RWStore.properties"
 
     cp  \
             docker-entrypoint.sh \
             "$version/"
 
-    jdkSuite="${jdkSuites[$version]:-$defaultjdkSuite}"
+    image="${images[$version]:-$defaultImage}"
     url="${urlBlazeGraphSuites[$version]}"
     fullVersion="${version}"
     dockerfiles+=( "$version/Dockerfile" )
@@ -58,7 +58,7 @@ for version in "${versions[@]}"; do
                 sed -ri \
                     -e 's!%%BLAZEGRAPH_VERSION%%!'"$fullVersion"'!' \
                     -e 's!%%BLAZEGRAPH_URL%%!'"$url"'!' \
-                    -e 's!%%JDK_SUITE%%!'"$jdkSuite"'!' \
+                    -e 's!%%IMAGE%%!'"$image"'!' \
                     ${f}
             )
         fi

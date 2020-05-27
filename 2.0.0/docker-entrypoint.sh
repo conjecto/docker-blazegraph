@@ -1,54 +1,60 @@
 #!/bin/bash
 set -eo pipefail
+shopt -s nullglob
 
-java_params=""
+JAVA_PARAMS=""
 
 if [ ! -z "$JAVA_XMS" ]; then
-    java_params+=( -Xms"${JAVA_XMS}" )
+    JAVA_PARAMS+=( -Xms"${JAVA_XMS}" )
 else
-    java_params+=( -Xms512m )
+    JAVA_PARAMS+=( -Xms512m )
 fi
 
 if [ ! -z "$JAVA_XMX" ]; then
-    java_params+=( -Xmx"${JAVA_XMX}" )
+    JAVA_PARAMS+=( -Xmx"${JAVA_XMX}" )
 else
-    java_params+=( -Xmx1g )
+    JAVA_PARAMS+=( -Xmx1g )
+fi
+
+declare -g JOURNAL_ALREADY_EXISTS
+if [ -d "$BLAZEGRAPH_HOME/blazegraph.jnl" ]; then
+    JOURNAL_ALREADY_EXISTS='true'
 fi
 
 _loadData() {
     namespace=$(basename "$1")
     if [ ! -e "$1/RWStore.properties" ]; then
-        echo >&2 ' No configuration file for the namespace '
+        echo >&2 'No configuration file for the namespace'
 		exit 1
 	fi
     if [ ! -e -d "$1/data" ]; then
-        echo >&2 ' No data dir for kb to import '
+        echo >&2 'No data dir for namespace to import'
 	fi
-    dataloader=( java ${java_params[@]} -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -quiet -namespace ${namespace} $1/RWStore.properties $1/data/ )
-    echo "loading $1"
+    dataloader=( java ${JAVA_PARAMS[@]} -cp /usr/bin/blazegraph.jar com.bigdata.rdf.store.DataLoader -namespace ${namespace} $1/RWStore.properties $1/data/ )
+    echo "Loading namespace $namespace ..."
     "${dataloader[@]}"
 }
 
 if [ "$1" = 'blazegraph' ]; then
+    # there's no journal, so it needs to be initialized
+    if [ -z "$JOURNAL_ALREADY_EXISTS" ]; then
+        for f in /docker-entrypoint-initdb.d/*; do
+            if [ -e $f ];then
+                _loadData "$f"
+            fi
+        done
+        echo
+        echo 'Blazegraph init process done. Ready for start up.'
+        echo
+    fi
 
+    # run blazegraph
     conf=()
     if [ -e /etc/blazegraph/override.xml ]; then
         conf+=( -Djetty.overrideWebXml=/etc/blazegraph/override.xml )
     fi
-
-    blazegraph=( java ${java_params[@]} ${conf[@]} -jar /usr/bin/blazegraph.jar )
-
-    echo
-    echo 'Blazegraph init process done. Ready for start up.'
-    echo
-
-    for f in docker-entrypoint-initdb.d/*; do
-        if [ -e $f ];then
-            _loadData "$f"
-        fi
-    done
-
-    echo "${blazegraph[@]}"
-    cd /var/lib/blazegraph
+    blazegraph=( java ${JAVA_PARAMS[@]} ${conf[@]} -jar /usr/bin/blazegraph.jar )
     exec "${blazegraph[@]}"
+else
+    exec "$@"
 fi
