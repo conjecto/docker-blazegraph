@@ -21,7 +21,7 @@ declare -A urlBlazeGraphSuites=(
 	[2.1.2]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_2/blazegraph.jar'
 	[2.1.4]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_4/blazegraph.jar'
 	[2.1.5]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_RELEASE_2_1_5/blazegraph.jar'
-	[2.1.6]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/bigdata.jar'
+	[2.1.6]='https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar'
 )
 
 versions=( "$@" )

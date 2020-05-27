@@ -1,7 +1,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
+-	[`2.1.6`, `2.1`, `2`, `latest` (*2.1.6/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.6/Dockerfile)
 -	[`2.1.5` (*2.1.5/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.5/Dockerfile)
 -	[`2.1.4` (*2.1.4/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.4/Dockerfile)
 -	[`2.1.2` (*2.1.2/Dockerfile*)](https://github.com/conjecto/docker-blazegraph/blob/master/2.1.2/Dockerfile)

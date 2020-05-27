@@ -6,7 +6,7 @@ ENV BLAZEGRAPH_HOME=/var/lib/blazegraph
 RUN apk update && apk add --no-cache bash
 
 # install blazegraph
-ADD https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/bigdata.jar /usr/bin/blazegraph.jar
+ADD https://github.com/blazegraph/database/releases/download/BLAZEGRAPH_2_1_6_RC/blazegraph.jar /usr/bin/blazegraph.jar
 RUN mkdir $BLAZEGRAPH_HOME
 
 # Config files
